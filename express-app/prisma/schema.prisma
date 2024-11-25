@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id         Int      @id @default(autoincrement())
+  firstName  String?
+  lastName   String?
+  email      String   @unique
+  password   String
+  phone      String?
+  createdAt  DateTime? @default(now())
+  updated_at DateTime? @default(now()) @updatedAt
+}
+
+model article {
+  id          Int       @id @default(autoincrement())
+  name        String?   @unique
+  description String?
+  price       Decimal?
+  stock       Int?
+  Image       Image[]
+  tags        ArticleTags[] // Relation avec la table pivot
+  createdAt   DateTime? @default(now())
+  updated_at  DateTime? @default(now()) @updatedAt
+}
+
+model tags {
+  id       Int       @id @default(autoincrement())
+  name     String?       @unique
+  articles ArticleTags[] // Relation avec la table pivot
+}
+
+model ArticleTags {
+  id         Int      @id @default(autoincrement())
+  articleId  Int      
+  tagId      Int
+  article    article  @relation(fields: [articleId], references: [id])
+  tag        tags     @relation(fields: [tagId], references: [id])
+
+  @@unique([articleId, tagId]) // Garantit qu'un article ne peut pas avoir le même tag deux fois
+}
+
+model Image {
+  id         String   @id @unique @default(cuid())
+  id_article article? @relation(fields: [articleId], references: [id])
+  main_image Boolean?
+  link       String?
+  articleId  Int
+  createdAt  DateTime? @default(now())
+  updated_at DateTime? @default(now()) @updatedAt
+}
+

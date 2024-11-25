@@ -1,0 +1,120 @@
+<template>
+  <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full overflow-hidden">
+
+      <div class="p-6 space-y-6">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-700">Informations personnelles</h3>
+          <p class="text-sm text-gray-700">{{ user.email || 'Email non disponible' }}</p>
+          <div class="mt-4">
+            <InputField
+              id="first-name"
+              label="Prénom"
+              v-model="user.firstName"
+              :disabled="!isEditing"
+              placeholder="Prénom"
+            />
+            <InputField
+              id="last-name"
+              label="Nom"
+              v-model="user.lastName"
+              :disabled="!isEditing"
+              placeholder="Nom"
+            />
+            <InputField
+              id="phone"
+              label="Numéro de téléphone"
+              v-model="user.phone"
+              :disabled="!isEditing"
+              placeholder="Entrez votre numéro de téléphone"
+            />
+          </div>
+        </div>
+
+        <div class="flex justify-center items-center">
+          <button
+            @click="toggleEdit"
+            class="bg-gray-700 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded-lg shadow-md transition focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-1"
+          >
+            {{ isEditing ? "Enregistrer" : "Modifier le profil" }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import axios from "axios";
+import { notification } from "ant-design-vue";
+import InputField from "../components/input/InputProfil.vue";
+
+export default {
+  name: "ProfilView",
+  components: { InputField },
+  data() {
+    return {
+      user: {
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+      },
+      isEditing: false,
+    };
+  },
+  async mounted() {
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/auth/me",
+        {},
+        { withCredentials: true }
+      );
+
+      const { firstName, lastName, email, phone } = response.data.user;
+      this.user = {
+        firstName,
+        lastName,
+        email,
+        phone: phone || "",
+      };
+    } catch (error) {
+      console.error(
+        "Erreur lors de la récupération des informations utilisateur :",
+        error
+      );
+    }
+  },
+  methods: {
+    toggleEdit() {
+      if (this.isEditing) {
+        this.saveChanges();
+      }
+      this.isEditing = !this.isEditing;
+    },
+    async saveChanges() {
+      try {
+        await axios.put(
+          "http://localhost:3000/auth/update",
+          {
+            firstName: this.user.firstName,
+            lastName: this.user.lastName,
+            phone: this.user.phone,
+          },
+          { withCredentials: true }
+        );
+        notification.success({
+          message: "Profil mis à jour",
+          description: "Vos informations ont été mises à jour avec succès.",
+        });
+      } catch (error) {
+        notification.error({
+          message: "Erreur",
+          description: "Une erreur s'est produite lors de la mise à jour du profil.",
+        });
+        console.error("Erreur lors de la sauvegarde des modifications :", error);
+      }
+    },
+  },
+};
+</script>
