@@ -4,7 +4,7 @@
     <div class="relative h-screen">
     <!-- Background Image -->
     <img 
-      src="@/assets/home/boutique.png" 
+      src="@/assets/home/boutique1.webp" 
       alt="Hero Background" 
       class="absolute inset-0 w-full h-full object-cover"
     />
@@ -15,7 +15,7 @@
         class="relative p-8 rounded-lg" 
         style="backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.2);"
       >
-        <h1 class="text-5xl font-bold mb-6 text-gray-700 font-titre_home">Bienvenue chez ECLORE</h1>
+        <h1 class="text-5xl font-bold mb-6 text-gray-700 font-titre_home">Bienvenue chez MiniBolides</h1>
         <p class="text-lg mb-6 text-gray-700 font-titre_home">
           Découvrez nos produits exceptionnels à des prix incroyables
         </p>

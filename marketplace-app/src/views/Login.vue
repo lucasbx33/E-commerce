@@ -74,17 +74,13 @@ export default {
   methods: {
     async login() {
     const authStore = useAuthStore();
-    this.errorMessage = '';  // Réinitialise le message d'erreur avant chaque tentative
+    this.errorMessage = '';
 
-    // Appel de l'API pour tenter de se connecter
     const response = await authStore.login(this.email, this.password);
 
-    // Vérifie le message dans la réponse API pour voir si les identifiants sont corrects
     if (response.message === 'Invalid credentials') {
-      // Si les identifiants sont incorrects, affiche un message d'erreur
       this.errorMessage = 'Vos identifiants sont incorrects.';
     } else {
-      // Si la connexion est réussie, redirige vers le tableau de bord
       this.$router.push('/');
     }
   }
@@ -92,7 +88,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-/* Ajoute un style personnalisé si nécessaire */
-</style>

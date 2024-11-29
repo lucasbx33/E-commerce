@@ -1,0 +1,24 @@
+-- CreateTable
+CREATE TABLE "Order" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "userId" INTEGER NOT NULL,
+    "totalPrice" DECIMAL,
+    "status" TEXT NOT NULL,
+    "createdAt" DATETIME DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "Order_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "OrderLine" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "orderId" INTEGER NOT NULL,
+    "articleId" INTEGER NOT NULL,
+    "quantity" INTEGER NOT NULL,
+    "unitPrice" DECIMAL NOT NULL,
+    "lineTotal" DECIMAL NOT NULL,
+    "createdAt" DATETIME DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "OrderLine_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "OrderLine_articleId_fkey" FOREIGN KEY ("articleId") REFERENCES "article" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);

@@ -19,6 +19,7 @@ model users {
   phone      String?
   createdAt  DateTime? @default(now())
   updated_at DateTime? @default(now()) @updatedAt
+  orders     Order[]  // Relation avec les commandes
 }
 
 model article {
@@ -31,6 +32,7 @@ model article {
   tags        ArticleTags[] // Relation avec la table pivot
   createdAt   DateTime? @default(now())
   updated_at  DateTime? @default(now()) @updatedAt
+  orderLines  OrderLine[] // Relation avec les lignes de commande
 }
 
 model tags {
@@ -41,7 +43,7 @@ model tags {
 
 model ArticleTags {
   id         Int      @id @default(autoincrement())
-  articleId  Int      
+  articleId  Int
   tagId      Int
   article    article  @relation(fields: [articleId], references: [id])
   tag        tags     @relation(fields: [tagId], references: [id])
@@ -59,3 +61,26 @@ model Image {
   updated_at DateTime? @default(now()) @updatedAt
 }
 
+model Order {
+  id          Int         @id @default(autoincrement())
+  user        users       @relation(fields: [userId], references: [id])
+  userId      Int         // Clé étrangère vers la table `users`
+  orderLines  OrderLine[] // Relation avec les lignes de commande
+  totalPrice  Decimal?    // Prix total de la commande
+  status      String      // Statut de la commande (ex : "en cours", "livrée", etc.)
+  createdAt   DateTime?   @default(now())
+  updated_at  DateTime?   @default(now()) @updatedAt
+}
+
+model OrderLine {
+  id          Int       @id @default(autoincrement())
+  order       Order     @relation(fields: [orderId], references: [id])
+  orderId     Int       // Clé étrangère vers la table `Order`
+  article     article   @relation(fields: [articleId], references: [id])
+  articleId   Int       // Clé étrangère vers la table `article`
+  quantity    Int       // Quantité commandée
+  unitPrice   Decimal   // Prix unitaire de l'article au moment de la commande
+  lineTotal   Decimal   // Total de la ligne (unitPrice * quantity)
+  createdAt   DateTime? @default(now())
+  updated_at  DateTime? @default(now()) @updatedAt
+}

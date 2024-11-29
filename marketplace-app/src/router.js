@@ -7,6 +7,8 @@ import { useAuthStore } from './stores/auth';
 import CreateArticle from './views/CreateArticle.vue';
 import ArticleDetails from './views/ArticleDetails.vue';
 import Cart from './views/Cart.vue';
+import Orders from './views/Orders.vue';
+import TestThree from './views/testThree.vue';
 
 const routes = [
   { path: '/', 
@@ -26,6 +28,7 @@ const routes = [
   {
     path: '/createArticle',
     component: CreateArticle,
+    meta: { requiresAuth: true }
   },
   {
     path: '/cart',
@@ -35,8 +38,17 @@ const routes = [
     path: '/article/:id',
     name: 'ArticleDetails',
     component: ArticleDetails,
-    props: true, // Permet de passer l'ID de l'article en tant que prop
+    props: true,
   },
+  { 
+    path: '/orders',
+    component: Orders,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/3D',
+    component: TestThree
+  }
 ];
 
 const router = createRouter({
@@ -44,7 +56,6 @@ const router = createRouter({
   routes,
 });
 
-// Vérifie l'authentification avant d'accéder à une route protégée
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
 

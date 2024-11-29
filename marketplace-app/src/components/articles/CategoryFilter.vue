@@ -1,35 +1,54 @@
 <template>
-  <div class=" p-12 rounded-lg mb-12">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <!-- Filtre par catégorie -->
-      <div>
-        <label for="category" class="block text-gray-700 font-medium mb-2">Catégorie</label>
-        <select
-          id="category"
-          v-model="filters.category"
-          @change="onFilterChange"
-          class="border border-gray-300 rounded-lg px-4 py-2 w-full"
-        >
-          <option value="">Toutes les catégories</option>
-          <option v-for="category in categories" :key="category" :value="category">
-            {{ category }}
-          </option>
-        </select>
-      </div>
+  <div class="w-full bg-gray-100 py-8 px-4 md:px-12 mb-8">
+    <!-- Conteneur centré -->
+    <div class="flex flex-col items-center space-y-8">
+      <!-- Conteneur des filtres -->
+      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-y-12 gap-x-16 w-full max-w-4xl">
+        <!-- Filtre par catégorie -->
+        <div class="flex flex-col items-center space-y-4">
+          <label for="category" class="text-gray-700 font-medium">Catégorie</label>
+          <select
+            id="category"
+            v-model="filters.category"
+            @change="onFilterChange"
+            class="border border-gray-300 rounded-lg px-4 py-2 w-full max-w-xs"
+          >
+            <option value="">Toutes les catégories</option>
+            <option v-for="category in categories" :key="category" :value="category">
+              {{ category }}
+            </option>
+          </select>
+        </div>
 
-      <div class="mb-4">
-        <label for="category" class="block text-gray-700 font-medium mb-2">Prix :</label>
-        <a-slider
-          v-model:value="filters.priceRange"
-          range
-          :min="10"
-          :max="100"
-          :marks="{
-            10: '10€',
-            100: '100€'
-          }"
-          @afterChange="onFilterChange"
-        />
+        <!-- Filtre par prix -->
+        <div class="flex flex-col items-center space-y-4">
+          <label for="priceRange" class="text-gray-700 font-medium">Prix</label>
+          <a-slider
+            v-model:value="filters.priceRange"
+            range
+            :min="10"
+            :max="100"
+            :marks="{
+              10: '10€',
+              100: '100€'
+            }"
+            @afterChange="onFilterChange"
+            class="w-full max-w-xs"
+          />
+        </div>
+
+        <!-- Filtre par nom -->
+        <div class="flex flex-col items-center space-y-4">
+          <label for="name" class="text-gray-700 font-medium">Nom de l'article</label>
+          <input
+            id="name"
+            type="text"
+            v-model="filters.name"
+            @blur="onFilterChange"
+            placeholder="Rechercher un article"
+            class="border border-gray-300 rounded-lg px-4 py-2 w-full max-w-xs"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -39,7 +58,6 @@
 export default {
   name: 'CategoryFilter',
   props: {
-    tags: [],
     categories: {
       type: Array,
       required: true,
@@ -70,7 +88,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-/* Ajout de styles spécifiques si nécessaire */
-</style>

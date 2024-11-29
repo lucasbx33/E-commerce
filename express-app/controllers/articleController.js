@@ -21,7 +21,12 @@ exports.createArticle = async (req, res) => {
     }
 
     const mainImageFile = req.files.mainImage;
-    const mainImagePath = path.join(IMAGE_FOLDER, mainImageFile.name);
+
+    // Renomme l'image principale avec le nom de l'article
+    const mainImageExtension = path.extname(mainImageFile.name);
+    const sanitizedArticleName = name.replace(/\s+/g, '_').toLowerCase(); // Remplace les espaces par des underscores
+    const mainImageFileName = `${sanitizedArticleName}_main${mainImageExtension}`;
+    const mainImagePath = path.join(IMAGE_FOLDER, mainImageFileName);
 
     // Sauvegarde l'image principale sur le disque
     await mainImageFile.mv(mainImagePath);
@@ -29,10 +34,12 @@ exports.createArticle = async (req, res) => {
     // Ajout d'autres images si présentes
     const otherImages = req.files?.otherImages || [];
     const otherImagePaths = Array.isArray(otherImages)
-      ? otherImages.map((file) => {
-          const filePath = path.join(IMAGE_FOLDER, file.name);
+      ? otherImages.map((file, index) => {
+          const fileExtension = path.extname(file.name);
+          const otherImageFileName = `${sanitizedArticleName}_other_${index + 1}${fileExtension}`;
+          const filePath = path.join(IMAGE_FOLDER, otherImageFileName);
           file.mv(filePath);
-          return { link: `/img_articles/${file.name}`, main_image: false };
+          return { link: `/img_articles/${otherImageFileName}`, main_image: false };
         })
       : [];
 
@@ -49,37 +56,40 @@ exports.createArticle = async (req, res) => {
         stock: parsedStock,
         Image: {
           create: [
-            { link: `/img_articles/${mainImageFile.name}`, main_image: true },
+            { link: `/img_articles/${mainImageFileName}`, main_image: true },
             ...otherImagePaths,
           ],
         },
       },
     });
-    console.log("test", tags)
+
     // Ajouter les tags si présents
     if (parsedTags && Array.isArray(parsedTags) && parsedTags.length > 0) {
       const validTags = await prisma.tags.findMany({
         where: { id: { in: parsedTags } },
       });
-    
+
       if (validTags.length !== parsedTags.length) {
         return res.status(400).json({
-          message: 'Certains tags fournis n\'existent pas.',
+          message: "Certains tags fournis n'existent pas.",
         });
       }
-    
-      const tagRelations = validTags.map(tag => ({
+
+      const tagRelations = validTags.map((tag) => ({
         articleId: article.id,
         tagId: tag.id,
       }));
-    
+
       await prisma.articleTags.createMany({ data: tagRelations });
     }
 
     res.status(201).json({ message: "Article créé avec succès", article });
   } catch (err) {
     console.error("Erreur lors de la création de l'article :", err);
-    res.status(500).json({ message: "Erreur lors de la création de l'article", error: err.message });
+    res.status(500).json({
+      message: "Erreur lors de la création de l'article",
+      error: err.message,
+    });
   }
 };
 
@@ -138,16 +148,19 @@ exports.getArticleById = async (req, res) => {
 exports.getMinimalArticles = async (req, res) => {
   try {
     const { category, priceMin, priceMax, name } = req.method === 'POST' ? req.body : req.query;
-    console.log("test" , category)
-    // Construire les filtres
+
+
+    // Applique les filtres
     const filters = {
       ...(category && {
         tags: {
           some: {
             tag: {
-              name: category, // Utiliser le nom du tag pour filtrer
+              name: {
+                contains: category.toLowerCase(), // Recherche partielle
+              },
             },
-          }
+          },
         },
       }),
       ...(priceMin !== null && priceMax !== null && {
@@ -156,12 +169,14 @@ exports.getMinimalArticles = async (req, res) => {
           lte: parseFloat(priceMax),
         },
       }),
+      ...(name && {
+        name: {
+          contains: name.toLowerCase(), // Recherche partielle insensible à la casse
+        },
+      }),
     };
-    
 
-    console.log('Filters:', filters);
-
-    // Requête pour récupérer les articles avec les tags
+    // Récupération des articles avec Prisma
     const articles = await prisma.article.findMany({
       where: filters,
       select: {
@@ -188,7 +203,7 @@ exports.getMinimalArticles = async (req, res) => {
       },
     });
 
-    // Ajouter les images en Base64 et reformater les tags
+    // Traitement des images et des tags
     const articlesWithImages = articles.map((article) => {
       const imagePath = article.Image?.[0]?.link
         ? path.join(__dirname, '..', article.Image[0].link)

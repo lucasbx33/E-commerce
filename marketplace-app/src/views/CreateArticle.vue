@@ -134,14 +134,12 @@
             formData.append('mainImage', this.mainImage);
           }
   
-          // Ajouter les images supplémentaires
           this.otherImages.forEach((image) => {
             formData.append('otherImages', image);
           });
   
-          // Envoyer la requête
-          await axios.post('http://localhost:3000/auth/articles', formData, {
-            withCredentials: true, // Inclut les cookies pour l'authentification
+          await axios.post('http://localhost:3000/articles/create', formData, {
+            withCredentials: true,
             headers: {
               'Content-Type': 'multipart/form-data',
             },
@@ -167,8 +165,3 @@
     },
   };
   </script>
-  
-  <style scoped>
-  /* Ajoutez ici vos styles spécifiques si besoin */
-  </style>
-  

@@ -6,7 +6,9 @@ const cookieParser = require('cookie-parser');
 const fileUpload = require('express-fileupload');
 
 const authRoutes = require('./routes/authRoutes');
-
+const articleRoute = require('./routes/articleRoute');
+const tagsRoute = require('./routes/tagsRoute');
+const ordersRoute = require('./routes/ordersRoute');
 const app = express();
 
 // Middleware
@@ -19,7 +21,10 @@ app.use(cors({
 app.use(fileUpload());
 
 // Routes
-app.use('/auth', authRoutes);  // Toutes les routes liées à l'authentification
+app.use('/auth', authRoutes);
+app.use('/articles', articleRoute);
+app.use('/tags', tagsRoute);
+app.use('/orders', ordersRoute);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

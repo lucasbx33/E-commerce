@@ -6,7 +6,6 @@ const prisma = new PrismaClient();
 const SECRET_KEY = process.env.SECRET_KEY;
 const REFRESH_SECRET_KEY = process.env.REFRESH_SECRET_KEY;
 
-// Inscription
 exports.register = async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -73,28 +72,22 @@ exports.login = async (req, res) => {
   }
 };
 
-// Fonction de validation du token
 exports.validateToken = (req, res) => {
-    const token = req.cookies.token;  // Récupère le token depuis le cookie
+    const token = req.cookies.token;
   
-    // Vérifie si le token est présent dans le cookie
     if (!token) {
       return res.status(401).json({ message: 'Access denied. No token provided.' });
     }
   
-    // Vérifie la validité du token avec la clé secrète
     jwt.verify(token, SECRET_KEY, (err, user) => {
       if (err) {
-        // Vérifie si le token est invalide ou expiré
         return res.status(403).json({ message: 'Invalid token or token expired.' });
       }
   
-      // Si tout est correct, renvoie les informations de l'utilisateur
       res.json({ user });
     });
 };
 
-// Fonction de rafraîchissement du token
 exports.refreshToken = (req, res) => {
   const refreshToken = req.cookies.refreshToken;
   if (!refreshToken) {
@@ -111,57 +104,48 @@ exports.refreshToken = (req, res) => {
       httpOnly: true,
       secure: true,
       sameSite: 'Strict',
-      maxAge: 60 * 60 * 1000, // 1 heure
+      maxAge: 60 * 60 * 1000,
     });
     res.json({ message: 'Token refreshed' });
   });
 };
 
 exports.logout = (req, res) => {
-    // Supprime le cookie 'token'
     res.clearCookie('token', {
       httpOnly: true,
-      secure: true,  // Assurez-vous d'utiliser 'secure' en production avec HTTPS
+      secure: true, 
       sameSite: 'Strict',
-      path: '/',     // Assurez-vous que le path est correct
+      path: '/',
     });
   
-    // Supprime le cookie 'refreshToken'
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: true,
       sameSite: 'Strict',
-      path: '/',     // Assurez-vous que le path est correct
+      path: '/',
     });
   
-    // Répondre avec un message indiquant que la déconnexion est réussie
     res.status(200).json({ message: 'Déconnexion réussie, cookies supprimés' });
 };
 
 exports.getUserInfo = async (req, res) => {
-  // Récupérer le token depuis les cookies
   const token = req.cookies.token;
 
-  // Vérifier si le token existe
   if (!token) {
     return res.status(401).json({ message: 'Access denied. No token provided.' });
   }
 
   try {
-    // Vérifier et décoder le token
     const decoded = jwt.verify(token, SECRET_KEY);
 
-    // Utiliser l'email décodé pour récupérer les informations de l'utilisateur
     const user = await prisma.users.findUnique({
       where: { email: decoded.email },
     });
 
-    // Si l'utilisateur n'est pas trouvé
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Renvoyer les informations de l'utilisateur (sans le mot de passe)
     const { password, ...userInfo } = user;
     res.json({ user: userInfo });
   } catch (err) {

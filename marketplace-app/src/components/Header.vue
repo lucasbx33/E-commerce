@@ -4,8 +4,7 @@
       <!-- Logo -->
       <div class="flex items-center space-x-4">
         <a href="/" class="flex items-center">
-          <img src="../assets/logo.png" class="w-12 h-12" alt="Logo" />
-          <p class="text-gray-900 font-bold text-2xl hover:text-gray-700">ECLORE</p>
+          <img src="../assets/logo.png" class="w-16 h-16" alt="Logo" />
         </a>
       </div>
 
@@ -88,6 +87,9 @@
             <router-link to="/profil" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
               Mon Profil
             </router-link>
+            <router-link to="/orders" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+              Mes commandes
+            </router-link>
             <button
               @click="logout"
               class="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
@@ -120,7 +122,7 @@ export default {
   setup() {
     const authStore = useAuthStore();
     const cartStore = useCartStore();
-    const mobileMenuOpen = ref(false); // Ajout de la gestion de l'état du menu burger
+    const mobileMenuOpen = ref(false);
     const dropdownOpen = ref(false);
 
     const toggleMobileMenu = () => {
@@ -133,7 +135,6 @@ export default {
 
     const logout = async () => {
       await authStore.logout();
-      this.$router.push('/login');
     };
 
     return {

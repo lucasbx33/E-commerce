@@ -97,7 +97,7 @@ export default {
   methods: {
     async fetchArticleDetails() {
       try {
-        const response = await axios.get(`http://localhost:3000/auth/articles/${this.id}`);
+        const response = await axios.get(`http://localhost:3000/articles/${this.id}`);
         this.article = response.data;
       } catch (error) {
         console.error("Erreur lors de la récupération des détails de l'article :", error);
