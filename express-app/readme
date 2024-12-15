@@ -1,3 +1,8 @@
-npx prisma generate
+Générer le fichier de base de données
+npx prisma migrate reset
 
+Importer des fausses données
+node data.js
+
+Lancer l'api
 npm start

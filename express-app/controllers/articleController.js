@@ -5,49 +5,43 @@ const path = require('path');
 
 const IMAGE_FOLDER = path.join(__dirname, '../img_articles');
 
-// Assurez-vous que le dossier d'images existe
 if (!fs.existsSync(IMAGE_FOLDER)) {
   fs.mkdirSync(IMAGE_FOLDER);
 }
 
-// Créer un article avec une image principale et des images supplémentaires
 exports.createArticle = async (req, res) => {
   const { name, description, price, stock, tags } = req.body;
   const parsedTags = tags ? JSON.parse(tags) : [];
   try {
-    // Vérifie si un fichier a été envoyé pour l'image principale
     if (!req.files || !req.files.mainImage) {
       return res.status(400).json({ message: "L'image principale est requise." });
     }
 
     const mainImageFile = req.files.mainImage;
 
-    // Renomme l'image principale avec le nom de l'article
     const mainImageExtension = path.extname(mainImageFile.name);
-    const sanitizedArticleName = name.replace(/\s+/g, '_').toLowerCase(); // Remplace les espaces par des underscores
+    const sanitizedArticleName = name.replace(/\s+/g, '_').toLowerCase(); 
     const mainImageFileName = `${sanitizedArticleName}_main${mainImageExtension}`;
     const mainImagePath = path.join(IMAGE_FOLDER, mainImageFileName);
 
-    // Sauvegarde l'image principale sur le disque
     await mainImageFile.mv(mainImagePath);
 
-    // Ajout d'autres images si présentes
     const otherImages = req.files?.otherImages || [];
     const otherImagePaths = Array.isArray(otherImages)
-      ? otherImages.map((file, index) => {
-          const fileExtension = path.extname(file.name);
-          const otherImageFileName = `${sanitizedArticleName}_other_${index + 1}${fileExtension}`;
-          const filePath = path.join(IMAGE_FOLDER, otherImageFileName);
-          file.mv(filePath);
-          return { link: `/img_articles/${otherImageFileName}`, main_image: false };
-        })
+      ? await Promise.all(
+          otherImages.map(async (file, index) => {
+            const fileExtension = path.extname(file.name);
+            const otherImageFileName = `${sanitizedArticleName}_other_${index + 1}${fileExtension}`;
+            const filePath = path.join(IMAGE_FOLDER, otherImageFileName);
+            await file.mv(filePath);
+            return { link: `/img_articles/${otherImageFileName}`, main_image: false };
+          })
+        )
       : [];
 
-    // Conversion des valeurs numériques
     const parsedPrice = parseFloat(price);
     const parsedStock = parseInt(stock, 10);
 
-    // Création de l'article
     const article = await prisma.article.create({
       data: {
         name,
@@ -63,7 +57,6 @@ exports.createArticle = async (req, res) => {
       },
     });
 
-    // Ajouter les tags si présents
     if (parsedTags && Array.isArray(parsedTags) && parsedTags.length > 0) {
       const validTags = await prisma.tags.findMany({
         where: { id: { in: parsedTags } },
@@ -93,7 +86,6 @@ exports.createArticle = async (req, res) => {
   }
 };
 
-// Récupérer tous les articles avec leurs images principales et tags
 exports.getArticles = async (req, res) => {
   try {
     const articles = await prisma.article.findMany({
@@ -117,7 +109,6 @@ exports.getArticles = async (req, res) => {
   }
 };
 
-// Récupérer un article par ID avec toutes ses images et tags
 exports.getArticleById = async (req, res) => {
   const { id } = req.params;
 
@@ -147,23 +138,17 @@ exports.getArticleById = async (req, res) => {
 
 exports.getMinimalArticles = async (req, res) => {
   try {
-    const { category, priceMin, priceMax, name } = req.method === 'POST' ? req.body : req.query;
+    const { category, priceMin, priceMax, name } = req.body;
 
-
-    // Applique les filtres
     const filters = {
-      ...(category && {
+      ...(category && category.length > 0 && {
         tags: {
           some: {
-            tag: {
-              name: {
-                contains: category.toLowerCase(), // Recherche partielle
-              },
-            },
+            tagId: { in: category },
           },
         },
       }),
-      ...(priceMin !== null && priceMax !== null && {
+      ...(priceMin && priceMax && {
         price: {
           gte: parseFloat(priceMin),
           lte: parseFloat(priceMax),
@@ -171,12 +156,13 @@ exports.getMinimalArticles = async (req, res) => {
       }),
       ...(name && {
         name: {
-          contains: name.toLowerCase(), // Recherche partielle insensible à la casse
+          contains: name,
+          mode: 'insensitive',
         },
       }),
     };
+    
 
-    // Récupération des articles avec Prisma
     const articles = await prisma.article.findMany({
       where: filters,
       select: {
@@ -184,50 +170,34 @@ exports.getMinimalArticles = async (req, res) => {
         name: true,
         description: true,
         price: true,
-        Image: {
-          select: {
-            link: true,
-          },
-          where: { main_image: true },
-        },
-        tags: {
-          select: {
-            tag: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-        },
+        Image: { where: { main_image: true }, select: { link: true } },
       },
     });
 
-    // Traitement des images et des tags
     const articlesWithImages = articles.map((article) => {
       const imagePath = article.Image?.[0]?.link
-        ? path.join(__dirname, '..', article.Image[0].link)
+        ? path.join(__dirname, '..', article.Image[0].link) 
         : null;
-
+    
       let imageBase64 = null;
       if (imagePath && fs.existsSync(imagePath)) {
         imageBase64 = fs.readFileSync(imagePath, { encoding: 'base64' });
       }
-
+    
       return {
         id: article.id,
         name: article.name,
         description: article.description,
         price: article.price,
-        image: imageBase64,
-        tags: article.tags.map(tagRelation => tagRelation.tag.name),
+        image: imageBase64, 
       };
     });
+    
 
     res.status(200).json(articlesWithImages);
-  } catch (err) {
-    console.error('Erreur lors de la récupération des articles :', err);
-    res.status(500).json({ message: 'Erreur lors de la récupération des articles', error: err.message });
+  } catch (error) {
+    console.error('Erreur lors de la récupération des articles :', error);
+    res.status(500).json({ message: 'Erreur lors de la récupération des articles', error: error.message });
   }
 };
 
@@ -253,11 +223,16 @@ exports.getArticleDetails = async (req, res) => {
       description: article.description,
       price: article.price,
       stock: article.stock,
-      images: article.Image.map((image) => ({
-        id: image.id,
-        base64: fs.readFileSync(path.join(__dirname, '..', image.link), { encoding: 'base64' }),
-      })),
-    };
+      images: article.Image.map((image) => {
+        const imagePath = path.join(__dirname, '..', image.link);
+        return fs.existsSync(imagePath)
+          ? {
+              id: image.id,
+              base64: fs.readFileSync(imagePath, { encoding: 'base64' }),
+            }
+          : null;
+      }).filter((img) => img !== null),
+    };    
 
     res.status(200).json(articleWithImages);
   } catch (err) {
@@ -315,5 +290,57 @@ exports.deleteArticle = async (req, res) => {
   } catch (err) {
     console.error("Erreur lors de la suppression de l'article :", err);
     res.status(500).json({ message: "Erreur lors de la suppression de l'article", error: err.message });
+  }
+};
+
+exports.updateArticle = async (req, res) => {
+  const { id } = req.params;
+  const { name, description, price, stock, tags } = req.body;
+
+  try {
+    console.log("Requête reçue pour mise à jour :", req.body); // Vérifiez les données envoyées
+
+    const existingArticle = await prisma.article.findUnique({
+      where: { id: parseInt(id, 10) },
+    });
+
+    if (!existingArticle) {
+      console.log("Article non trouvé :", id);
+      return res.status(404).json({ message: "Article introuvable." });
+    }
+
+    const updates = {
+      ...(name && { name }),
+      ...(description && { description }),
+      ...(price && { price: parseFloat(price) }),
+      ...(stock && { stock: parseInt(stock, 10) }),
+    };
+
+    const updatedArticle = await prisma.article.update({
+      where: { id: parseInt(id, 10) },
+      data: updates,
+    });
+
+    console.log("Article mis à jour :", updatedArticle);
+
+    if (tags) {
+      const parsedTags = JSON.parse(tags);
+
+      await prisma.articleTags.deleteMany({
+        where: { articleId: parseInt(id, 10) },
+      });
+
+      const tagRelations = parsedTags.map((tagId) => ({
+        articleId: parseInt(id, 10),
+        tagId: parseInt(tagId, 10),
+      }));
+
+      await prisma.articleTags.createMany({ data: tagRelations });
+    }
+
+    res.status(200).json({ message: "Article mis à jour avec succès", updatedArticle });
+  } catch (err) {
+    console.error("Erreur lors de la mise à jour de l'article :", err);
+    res.status(500).json({ message: "Erreur lors de la mise à jour de l'article", error: err.message });
   }
 };

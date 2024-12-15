@@ -7,23 +7,24 @@ const SECRET_KEY = process.env.SECRET_KEY;
 const REFRESH_SECRET_KEY = process.env.REFRESH_SECRET_KEY;
 
 exports.register = async (req, res) => {
-    const { email, password } = req.body;
-    try {
+  const { email, password, firstName, lastName } = req.body;
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-      const hashedPassword = await bcrypt.hash(password, 10);
-  
-      const user = await prisma.users.create({
-        data: {
-          email,
-          password: hashedPassword,
-        },
-      });
-  
-      res.status(201).json({ message: 'User registered', user });
-    } catch (err) {
-      console.error('Error registering user:', err);
-      res.status(500).json({ message: 'Error registering user', error: err.message });
-    }
+    const user = await prisma.users.create({
+      data: {
+        email,
+        password: hashedPassword,
+        firstName,
+        lastName, 
+      },
+    });
+
+    res.status(201).json({ message: 'User registered', user });
+  } catch (err) {
+    console.error('Error registering user:', err);
+    res.status(500).json({ message: 'Error registering user', error: err.message });
+  }
 };
 
 
@@ -48,8 +49,13 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ email: user.email }, SECRET_KEY, { expiresIn: '1h' });
-    const refreshToken = jwt.sign({ email: user.email }, REFRESH_SECRET_KEY, { expiresIn: '7d' });
+    const tokenPayload = { 
+      email: user.email,
+      roles: user.roles 
+    };
+
+    const token = jwt.sign(tokenPayload, SECRET_KEY, { expiresIn: '1h' });
+    const refreshToken = jwt.sign(tokenPayload, REFRESH_SECRET_KEY, { expiresIn: '7d' });
 
     res.cookie('token', token, {
       httpOnly: true,
@@ -65,7 +71,10 @@ exports.login = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({ message: 'Login successful', user: { email: user.email } });
+    res.json({ 
+      message: 'Login successful', 
+      user: { email: user.email, roles: user.roles } 
+    });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ message: 'Login error', error: err.message });

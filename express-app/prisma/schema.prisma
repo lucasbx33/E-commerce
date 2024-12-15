@@ -19,7 +19,8 @@ model users {
   phone      String?
   createdAt  DateTime? @default(now())
   updated_at DateTime? @default(now()) @updatedAt
-  orders     Order[]  // Relation avec les commandes
+  orders     Order[]
+  roles      String   @default("[]")
 }
 
 model article {
@@ -29,16 +30,16 @@ model article {
   price       Decimal?
   stock       Int?
   Image       Image[]
-  tags        ArticleTags[] // Relation avec la table pivot
+  tags        ArticleTags[]
   createdAt   DateTime? @default(now())
   updated_at  DateTime? @default(now()) @updatedAt
-  orderLines  OrderLine[] // Relation avec les lignes de commande
+  orderLines  OrderLine[]
 }
 
 model tags {
   id       Int       @id @default(autoincrement())
   name     String?       @unique
-  articles ArticleTags[] // Relation avec la table pivot
+  articles ArticleTags[]
 }
 
 model ArticleTags {
@@ -48,7 +49,7 @@ model ArticleTags {
   article    article  @relation(fields: [articleId], references: [id])
   tag        tags     @relation(fields: [tagId], references: [id])
 
-  @@unique([articleId, tagId]) // Garantit qu'un article ne peut pas avoir le même tag deux fois
+  @@unique([articleId, tagId])
 }
 
 model Image {
@@ -62,12 +63,13 @@ model Image {
 }
 
 model Order {
-  id          Int         @id @default(autoincrement())
+  id          String      @id @default(cuid())
   user        users       @relation(fields: [userId], references: [id])
-  userId      Int         // Clé étrangère vers la table `users`
-  orderLines  OrderLine[] // Relation avec les lignes de commande
-  totalPrice  Decimal?    // Prix total de la commande
-  status      String      // Statut de la commande (ex : "en cours", "livrée", etc.)
+  userId      Int        
+  orderLines  OrderLine[]
+  orderNumber Int
+  totalPrice  Decimal?   
+  status      String     
   createdAt   DateTime?   @default(now())
   updated_at  DateTime?   @default(now()) @updatedAt
 }
@@ -75,12 +77,12 @@ model Order {
 model OrderLine {
   id          Int       @id @default(autoincrement())
   order       Order     @relation(fields: [orderId], references: [id])
-  orderId     Int       // Clé étrangère vers la table `Order`
+  orderId     String
   article     article   @relation(fields: [articleId], references: [id])
-  articleId   Int       // Clé étrangère vers la table `article`
-  quantity    Int       // Quantité commandée
-  unitPrice   Decimal   // Prix unitaire de l'article au moment de la commande
-  lineTotal   Decimal   // Total de la ligne (unitPrice * quantity)
+  articleId   Int
+  quantity    Int    
+  unitPrice   Decimal
+  lineTotal   Decimal
   createdAt   DateTime? @default(now())
   updated_at  DateTime? @default(now()) @updatedAt
 }
