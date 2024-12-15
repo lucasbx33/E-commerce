@@ -1,5 +1,5 @@
 {
-  "name": "marketplace-app",
+  "name": "MaPetiteCave",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -14,7 +14,7 @@
     "flowbite": "^2.5.1",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
-    "marketplace-app": "file:",
+    "MaPetiteCave": "file:",
     "pinia": "^2.2.4",
     "three": "^0.170.0",
     "vue": "^3.2.13",

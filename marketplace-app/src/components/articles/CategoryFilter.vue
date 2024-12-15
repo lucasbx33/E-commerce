@@ -30,9 +30,9 @@
           <a-slider
             v-model:value="filters.priceRange"
             range
-            :min="10"
+            :min="-1"
             :max="200"
-            :marks="{ 10: '10€', 200: '200€' }"
+            :marks="{ 0: '0€', 200: '200€' }"
             @afterChange="onFilterChange"
             class="w-full"
           />

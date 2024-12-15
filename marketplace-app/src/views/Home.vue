@@ -11,7 +11,7 @@
         <h1 class="text-4xl md:text-6xl font-extrabold mb-4">
           NE CHERCHEZ PLUS EN VIN
         </h1>
-        <button class="cta-main-btn">
+        <button class="cta-main-btn" href="#products"  @click="scrollToProducts">
           Acheter du vin
         </button>
       </div>
@@ -129,6 +129,17 @@ export default {
     if (header) {
       this.headerHeight = header.offsetHeight; 
     }
+  },
+  methods: {
+    scrollToProducts() {
+      const targetSection = document.getElementById("products");
+      if (targetSection) {
+        targetSection.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    },
   },
 };
 </script>

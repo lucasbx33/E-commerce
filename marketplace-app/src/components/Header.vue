@@ -42,9 +42,49 @@
               Nous contacter
             </a>
           </li>
+          <!-- Panier visible uniquement sur mobile -->
+          <li v-if="!isAdmin" class="lg:hidden">
+            <button @click="$router.push('/cart')" class="flex items-center px-6 py-4 text-gray-700 hover:text-blue-600 transition duration-300 font-medium">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-6 h-6 mr-2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3 3h2l.36 2M6 15h12l1.24-7.5H7.76L6 15z"
+                />
+                <circle cx="9" cy="21" r="1.5" />
+                <circle cx="17" cy="21" r="1.5" />
+              </svg>
+              Panier
+              <span
+                v-if="cartStore.cartCount > 0"
+                class="ml-2 bg-red-500 text-white text-xs font-bold rounded-full px-1"
+              >
+                {{ cartStore.cartCount }}
+              </span>
+            </button>
+          </li>
+          <!-- Profil visible uniquement sur mobile -->
+          <li v-if="isLoggedIn" class="lg:hidden">
+            <button @click="toggleDropdown" class="flex items-center px-6 py-4 text-gray-700 hover:text-blue-600 transition duration-300 font-medium">
+              <img
+                src="https://www.w3schools.com/howto/img_avatar.png"
+                alt="Profil"
+                class="w-8 h-8 rounded-full border-2 border-blue-600 mr-2"
+              />
+              Profil
+            </button>
+          </li>
         </ul>
       </div>
 
+      <!-- Profil et Panier visibles uniquement sur desktop -->
       <div class="hidden lg:flex items-center space-x-6">
         <!-- Panier -->
         <div class="relative" v-if="!isAdmin">
@@ -101,19 +141,11 @@
             </button>
           </div>
         </div>
-
-        <!-- Login Button -->
-        <button
-          v-if="!isLoggedIn"
-          @click="$router.push('/login')"
-          class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-500 shadow"
-        >
-          Connexion
-        </button>
       </div>
     </nav>
   </header>
 </template>
+
 
 <script>
 import { ref } from 'vue';
