@@ -39,7 +39,6 @@ export default {
             loader.load(
             '/assets/car.glb', // Chemin vers votre fichier .glb
             (gltf) => {
-                console.log('Modèle chargé :', gltf.scene);
 
                 // Centrer la caméra autour du modèle
                 const box = new THREE.Box3().setFromObject(gltf.scene);

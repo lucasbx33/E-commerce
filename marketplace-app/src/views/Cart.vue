@@ -70,11 +70,10 @@ export default {
           quantity: item.quantity,
         }));
 
-        const data = await createOrder(orderLines);
+        await createOrder(orderLines);
 
         this.$router.push('/orders');
         this.cartStore.clearCart();
-        console.log(data);
       } catch (err) {
         alert('Une erreur est survenue lors de la commande.');
       }
