@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
-import { useRouter } from 'vue-router';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -26,17 +25,17 @@ export const useAuthStore = defineStore('auth', {
         this.user = response.data.user; 
         this.token = response.data.token;
       } catch (error) {
-        console.error('Token validation failed', error);
+        console.error('Token validation failed:', error);
         this.logout();
       }
     },
 
-    async register(email, password) {
+    async logout() {
       try {
-        const response = await axios.post('http://localhost:3000/auth/register', { email, password }, { withCredentials: true });
-        return response.data; 
+        await axios.post('http://localhost:3000/auth/logout', {}, { withCredentials: true });
+        this.user = null;
       } catch (error) {
-        return error.response.data; 
+        console.error('Erreur lors de la déconnexion', error);
       }
     },
 
@@ -48,26 +47,13 @@ export const useAuthStore = defineStore('auth', {
         console.error('Token refresh failed', error);
       }
     },
-
-    async logout() {
-      const router = useRouter();
-
-      try {
-        await axios.post('http://localhost:3000/auth/logout', {}, { withCredentials: true });
-
-        this.user = null;
-
-        router.push('/login');
-      } catch (error) {
-        console.error('Erreur lors de la déconnexion', error);
-      }
-    },
   },
 
   getters: {
-    isAuthenticated: (state) => {
-      //console.log('isAuthenticated:', !!state.user);
-      return !!state.user;
-    }
-  }
+    isAuthenticated: (state) => !!state.user,
+    roles: (state) => state.user?.roles || [],
+
+    hasRole: (state) => (role) => state.user?.roles.includes(role),
+    isAdmin: (state) => state.user?.roles?.includes('ROLE_ADMIN') || false,
+  },
 });

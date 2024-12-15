@@ -1,92 +1,167 @@
 <template>
-  <div class="min-h-screen bg-gray-100">
-    <!-- Hero Section -->
-    <div class="relative h-screen">
-    <!-- Background Image -->
-    <img 
-      src="@/assets/home/boutique1.webp" 
-      alt="Hero Background" 
-      class="absolute inset-0 w-full h-full object-cover"
-    />
-    
-    <!-- Hero Content with Blurred Background -->
-    <div class="absolute inset-0 flex flex-col justify-center items-center text-center text-white px-4">
-      <div 
-        class="relative p-8 rounded-lg" 
-        style="backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.2);"
-      >
-        <h1 class="text-5xl font-bold mb-6 text-gray-700 font-titre_home">Bienvenue chez MiniBolides</h1>
-        <p class="text-lg mb-6 text-gray-700 font-titre_home">
-          Découvrez nos produits exceptionnels à des prix incroyables
-        </p>
+  <div class="min-h-screen">
+    <div class="relative h-[60vh]">
+      <img
+        src="@/assets/home/home_screen.png"
+        alt="Hero Background"
+        class="absolute inset-0 w-full h-full object-cover"
+      />
+
+      <div class="absolute inset-0 flex flex-col justify-center items-center text-white text-center px-4">
+        <h1 class="text-4xl md:text-6xl font-extrabold mb-4">
+          NE CHERCHEZ PLUS EN VIN
+        </h1>
+        <button class="cta-main-btn">
+          Acheter du vin
+        </button>
       </div>
     </div>
 
-    <!-- Scroll Indicator with "Voir les produits" -->
-    <div class="absolute bottom-10 w-full flex justify-center">
-      <a 
-        @click.prevent="scrollToProducts"
-        class="flex flex-col items-center text-white text-lg font-bold animate-bounce"
-      >
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          class="h-8 w-8 mb-2" 
-          fill="none" 
-          viewBox="0 0 24 24" 
-          stroke="currentColor"
+    <div class="py-12 flex justify-center">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div
+          class="relative bg-white w-64 rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-2xl hover:scale-105 transition-transform duration-300 cursor-pointer"
         >
-          <path 
-            stroke-linecap="round" 
-            stroke-linejoin="round" 
-            stroke-width="2" 
-            d="M19 9l-7 7-7-7" 
+          <img
+            src="@/assets/home/vin_rouge.png"
+            alt="Vin Rouge"
+            class="w-full h-48 object-cover"
           />
-        </svg>
-      </a>
-    </div>
-  </div>
+          <div class="absolute bottom-0 w-full flex items-center justify-between bg-white py-3 px-4">
+            <h3 class="text-base font-semibold text-gray-800">Vin Rouge</h3>
+            <div class="flex items-center justify-center w-8 h-8 rounded-full border-2 border-yellow-500">
+              <svg
+                class="w-4 h-4 text-yellow-500"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
 
-    <!-- Products Section -->
-    <div id="products" class="container mx-auto py-12">
-      <h2 class="text-3xl font-bold text-center">Nos Produits</h2>
-      <ArticleBox :products="products" />
-    </div>
+        <div
+          class="relative bg-white w-64 rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-2xl hover:scale-105 transition-transform duration-300 cursor-pointer"
+        >
+          <img
+            src="@/assets/home/vin_rose.png"
+            alt="Vin Rosé"
+            class="w-full h-48 object-cover"
+          />
+          <div class="absolute bottom-0 w-full flex items-center justify-between bg-white py-3 px-4">
+            <h3 class="text-base font-semibold text-gray-800">Vin Rosé</h3>
+            <div class="flex items-center justify-center w-8 h-8 rounded-full border-2 border-yellow-500">
+              <svg
+                class="w-4 h-4 text-yellow-500"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
 
-    <!-- Newsletter Section -->
-    <div class="bg-gray-200 py-20">
-      <div class="container mx-auto text-center">
-        <h2 class="text-3xl font-bold mb-6">Restez informé</h2>
-        <p class="text-lg mb-6">Inscrivez-vous à notre newsletter pour ne manquer aucune de nos offres spéciales !</p>
-        <div class="flex justify-center">
-          <input type="email" placeholder="Votre email" class="px-4 py-2 rounded-l-lg border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
-          <button class="bg-blue-600 text-white px-6 py-2 rounded-r-lg hover:bg-blue-500 transition duration-300">
-            S'inscrire
-          </button>
+        <div
+          class="relative bg-white w-64 rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-2xl hover:scale-105 transition-transform duration-300 cursor-pointer"
+        >
+          <img
+            src="@/assets/home/vin_blanc.png"
+            alt="Vin Blanc"
+            class="w-full h-48 object-cover"
+          />
+          <div class="absolute bottom-0 w-full flex items-center justify-between bg-white py-3 px-4">
+            <h3 class="text-base font-semibold text-gray-800">Vin Blanc</h3>
+            <div class="flex items-center justify-center w-8 h-8 rounded-full border-2 border-yellow-500">
+              <svg
+                class="w-4 h-4 text-yellow-500"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+
+    <div id="products" class="container mx-auto py-12">
+      <h2 class="text-3xl font-bold text-center mb-6">Nos Produits</h2>
+      <ArticleBox :products="products" />
+    </div>
+
+    <!-- 3D Object Section -->
+    <!-- <div class="relative w-full h-96">
+      <ThreeObject />
+    </div> -->
   </div>
 </template>
 
+
 <script>
-import ArticleBox from '@/components/articles/ArticleBox.vue';
+import ArticleBox from "@/components/articles/ArticleBox.vue";
+// import ThreeObject from "@/components/3D/object3d.vue";
 
 export default {
-  name: 'HomeVue',
+  name: "HomeVue",
   components: {
     ArticleBox,
+    // ThreeObject,
   },
-  methods: {
-    scrollToProducts() {
-      const productsSection = document.querySelector('#products');
-      if (productsSection) {
-        productsSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    },
+  data() {
+    return {
+      headerHeight: 64,
+    };
+  },
+  mounted() {
+    const header = document.querySelector("header");
+    if (header) {
+      this.headerHeight = header.offsetHeight; 
+    }
   },
 };
 </script>
 
 <style scoped>
-/* Ajout de styles pour ajuster la présentation si nécessaire */
+.cta-main-btn {
+  background-color: #ffd700; 
+  color: #000; 
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.cta-main-btn:hover {
+  background-color: #ffc107; 
+  transform: translateY(-3px);
+}
+
+.cta-btn {
+  background-color: transparent;
+  color: #000;
+  border: 2px solid #ffd700; 
+  padding: 0.5rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: bold;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.cta-btn:hover {
+  background-color: #ffd700; 
+  color: #000; 
+}
 </style>

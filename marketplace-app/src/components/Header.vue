@@ -1,6 +1,6 @@
 <template>
   <header class="bg-white shadow-lg sticky top-0 w-full z-50">
-    <nav class="container mx-auto flex justify-between items-center p-6">
+    <nav class="container mx-auto flex justify-between items-center p-2">
       <!-- Logo -->
       <div class="flex items-center space-x-4">
         <a href="/" class="flex items-center">
@@ -17,34 +17,37 @@
 
       <!-- Navigation Links -->
       <div 
-  class="absolute lg:static w-full bg-white lg:w-auto top-full left-0 lg:flex lg:space-x-8"
-  :class="mobileMenuOpen ? 'block' : 'hidden lg:flex'"
-  style="transition: max-height 0.3s ease-in-out;"
->
-  <ul class="flex flex-col lg:flex-row">
-    <li>
-      <a href="/#products" class="block px-6 py-4 text-gray-700 hover:text-blue-600 transition duration-300 font-medium">
-        Nos produits
-      </a>
-    </li>
-    <li>
-      <a href="#account" class="block px-6 py-4 text-gray-700 hover:text-blue-600 transition duration-300 font-medium">
-        Mon espace
-      </a>
-    </li>
-    <li>
-      <a href="#contact" class="block px-6 py-4 text-gray-700 hover:text-blue-600 transition duration-300 font-medium">
-        Nous contacter
-      </a>
-    </li>
-  </ul>
-</div>
+        class="absolute lg:static w-full bg-white lg:w-auto top-full left-0 lg:flex lg:space-x-8"
+        :class="mobileMenuOpen ? 'block' : 'hidden lg:flex'"
+        style="transition: max-height 0.3s ease-in-out;"
+      >
+        <ul class="flex flex-col lg:flex-row">
+          <li>
+            <a href="/#products" class="block px-6 py-4 text-gray-700 hover:text-blue-600 transition duration-300 font-medium">
+              Nos produits
+            </a>
+          </li>
+          <li>
+            <a v-if="!isAdmin" href="#account" class="block px-6 py-4 text-gray-700 hover:text-blue-600 transition duration-300 font-medium">
+              Mon espace
+            </a>
+          </li>
+          <li v-if="isAdmin">
+            <a href="/createArticle" class="block px-6 py-4 text-gray-700 hover:text-blue-600 transition duration-300 font-medium">
+              Créer un article
+            </a>
+          </li>
+          <li>
+            <a href="#contact" class="block px-6 py-4 text-gray-700 hover:text-blue-600 transition duration-300 font-medium">
+              Nous contacter
+            </a>
+          </li>
+        </ul>
+      </div>
 
-
-      <!-- Right Side -->
       <div class="hidden lg:flex items-center space-x-6">
         <!-- Panier -->
-        <div class="relative">
+        <div class="relative" v-if="!isAdmin">
           <button @click="$router.push('/cart')" class="relative flex items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -87,7 +90,7 @@
             <router-link to="/profil" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
               Mon Profil
             </router-link>
-            <router-link to="/orders" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+            <router-link to="/orders" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" v-if="!isAdmin">
               Mes commandes
             </router-link>
             <button
@@ -150,6 +153,9 @@ export default {
   computed: {
     isLoggedIn() {
       return this.authStore.isAuthenticated;
+    },
+    isAdmin() {
+      return this.authStore.isAdmin;
     },
     userName() {
       return this.authStore.user ? this.authStore.user.username : 'Utilisateur';

@@ -7,61 +7,43 @@
       </router-link>
     </div>
 
-    <!-- Article details -->
-    <div v-if="article" class="bg-white rounded-lg p-6 flex flex-col lg:flex-row gap-6">
-      <!-- Image Slider -->
+    <div v-if="article" class="bg-white rounded-lg p-6 flex flex-col lg:flex-row">
       <div class="lg:w-1/2">
-        <div class="relative">
-          <img
-            :src="'data:image/jpeg;base64,' + article.images[currentImageIndex].base64"
-            alt="Article image"
-            class="w-full h-96 object-cover rounded-lg shadow"
-          />
-          <!-- Navigation buttons -->
-          <button 
-            @click="prevImage"
-            class="absolute top-1/2 left-4 bg-white text-gray-600 rounded-full shadow-md p-2 focus:outline-none"
-          >
-            ◀
-          </button>
-          <button 
-            @click="nextImage"
-            class="absolute top-1/2 right-4 bg-white text-gray-600 rounded-full shadow-md p-2 focus:outline-none"
-          >
-            ▶
-          </button>
-        </div>
-        <!-- Thumbnails -->
-        <div class="flex mt-4 gap-2 overflow-x-auto">
-          <img
-            v-for="(image, index) in article.images"
-            :key="image.id"
-            :src="'data:image/jpeg;base64,' + image.base64"
-            alt="Thumbnail"
-            @click="currentImageIndex = index"
-            :class="{
-              'border-2 border-blue-500': currentImageIndex === index,
-              'opacity-50': currentImageIndex !== index
-            }"
-            class="w-20 h-20 object-cover rounded-lg cursor-pointer shadow-md"
-          />
-        </div>
+        <ImageCarousel :images="article.images" />
       </div>
 
       <!-- Article Info -->
-      <div class="flex flex-col lg:w-1/2">
-        <h1 class="text-4xl font-bold mb-4 text-gray-800">{{ article.name }}</h1>
-        <p class="text-gray-600 mb-6 leading-relaxed">{{ article.description }}</p>
-        <div class="text-2xl font-semibold text-blue-700 mb-4">
-          {{ article.price }} €
+      <div class="pl-6 text-left">
+        <EditableFields
+          :fields="editableFields"
+          :isEditing="isEditing"
+          @update:fields="updateEditableFields"
+        />
+
+        <!-- Edit and Save Buttons -->
+        <div class="flex justify-center items-center space-x-4 mt-4">
+          <button
+            v-if="isAdmin"
+            @click="toggleEdit"
+            class="bg-gray-600 text-white px-4 py-2 rounded-lg shadow hover:bg-gray-500 transition"
+          >
+            {{ isEditing ? "Annuler" : "Modifier" }}
+          </button>
+
+          <button
+            v-if="isAdmin && isEditing"
+            @click="saveChanges"
+            class="bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-500 transition"
+          >
+            Enregistrer
+          </button>
         </div>
-        <p class="text-gray-800 mb-4">
-          Quantité en stock : 
-          <span class="font-bold text-green-600">{{ article.stock }}</span>
-        </p>
-        <button 
-          @click="addToCart" 
-          class="bg-gray-600 text-white px-8 py-3 rounded-lg shadow hover:bg-gray-500 transition-all duration-300 focus:ring focus:ring-blue-300 focus:outline-none"
+
+        <!-- Add to Cart Button -->
+        <button
+          v-if="!isAdmin"
+          @click="addToCart"
+          class="mt-4 bg-gray-600 text-white px-8 py-3 rounded-lg shadow hover:bg-gray-500 transition"
         >
           Ajouter au panier
         </button>
@@ -75,49 +57,95 @@
   </div>
 </template>
 
-
 <script>
-import axios from 'axios';
-import { useCartStore } from '../stores/cartStore';
+import { useAuthStore } from '@/stores/auth';
+import { useCartStore } from '@/stores/cartStore';
+import { fetchArticleDetails, updateArticle } from '@/services/articleDetails';
+import ImageCarousel from '@/components/articles/details/ImageCarousel.vue';
+import EditableFields from '@/components/articles/details/EditableFields.vue';
 
 export default {
   name: 'ArticleDetails',
+  components: {
+    ImageCarousel,
+    EditableFields,
+  },
   props: {
     id: {
       type: String,
       required: true,
     },
   },
+  setup() {
+    const authStore = useAuthStore();
+    const cartStore = useCartStore();
+
+    return {
+      authStore,
+      cartStore,
+    };
+  },
   data() {
     return {
       article: null,
       currentImageIndex: 0,
+      isEditing: false,
+      editableFields: {
+        name: '',
+        description: '',
+        price: '',
+        stock: '',
+      },
     };
   },
+  computed: {
+    isAdmin() {
+      return this.authStore.isAdmin;
+    },
+    formattedDescription() {
+      return this.article ? this.article.description.replace(/\n/g, '<br>') : '';
+    },
+  },
   methods: {
+    updateEditableFields(updatedFields) {
+      this.editableFields = { ...updatedFields };
+    },
     async fetchArticleDetails() {
       try {
-        const response = await axios.get(`http://localhost:3000/articles/${this.id}`);
-        this.article = response.data;
+        this.article = await fetchArticleDetails(this.id);
+        this.editableFields = {
+          name: this.article.name,
+          description: this.article.description,
+          price: this.article.price,
+          stock: this.article.stock,
+        };
       } catch (error) {
-        console.error("Erreur lors de la récupération des détails de l'article :", error);
+        alert("Une erreur est survenue lors de la récupération des détails de l'article.");
       }
     },
-    nextImage() {
-      this.currentImageIndex = (this.currentImageIndex + 1) % this.article.images.length;
+    toggleEdit() {
+      if (!this.isEditing) {
+        this.editableFields = { ...this.article };
+      }
+      this.isEditing = !this.isEditing;
     },
-    prevImage() {
-      this.currentImageIndex =
-        (this.currentImageIndex - 1 + this.article.images.length) % this.article.images.length;
+    async saveChanges() {
+      try {
+        await updateArticle(this.id, this.editableFields);
+        // Mettre à jour `article` avec les nouvelles valeurs
+        this.article = { ...this.article, ...this.editableFields };
+        this.isEditing = false;
+      } catch (error) {
+        alert("Une erreur est survenue lors de la mise à jour de l'article.");
+      }
     },
     addToCart() {
-      const cartStore = useCartStore();
       const item = {
         id: this.article.id,
         name: this.article.name,
         price: this.article.price,
       };
-      cartStore.addToCart(item);
+      this.cartStore.addToCart(item);
     },
   },
   mounted() {

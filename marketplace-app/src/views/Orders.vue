@@ -14,11 +14,11 @@
   
       <div v-else class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         <div
-          v-for="(order, index) in orders"
-          :key="index"
+          v-for="order in orders"
+          :key="order.id"
           class="bg-white shadow-md rounded-lg p-6 border border-gray-200 hover:shadow-lg transition relative"
         >
-          <h2 class="text-xl font-bold mb-2 text-gray-800">Commande #{{ order.id }}</h2>
+          <h2 class="text-xl font-bold mb-2 text-gray-800">Commande #{{ order.orderNumber }}</h2>
           <p class="text-sm text-gray-500 mb-2">Passée le : {{ new Date(order.createdAt).toLocaleDateString() }}</p>
           <p class="text-sm text-gray-500 mb-4">Statut : <span class="font-semibold capitalize">{{ order.status }}</span></p>
           
@@ -53,11 +53,11 @@
       </div>
     </div>
   </template>
-  
-  <script>
-  import axios from 'axios';
+
+<script>
+  import { fetchOrders, fetchOrderPdf } from '@/services/orders';
   import { PrinterOutlined } from '@ant-design/icons-vue';
-  
+
   export default {
     name: 'OrdersVue',
     components: {
@@ -70,40 +70,29 @@
     },
     async mounted() {
       try {
-        const response = await axios.get('http://localhost:3000/orders', {
-          withCredentials: true,
-        });
-        this.orders = response.data.orders;
+        this.orders = await fetchOrders();
       } catch (err) {
-        console.error('Erreur lors de la récupération des commandes :', err.message);
         alert('Une erreur est survenue lors de la récupération des commandes.');
       }
     },
     methods: {
-      printOrder(order) {
-        console.log('Printing order:', order);
-        alert(`Impression du bon de commande pour la commande #${order.id}`);
-      },
       async downloadOrderPdf(orderId) {
-    try {
-      const response = await axios.get(`http://localhost:3000/orders/${orderId}/pdf`, {
-        responseType: 'blob',
-        withCredentials: true,
-      });
+        try {
+          const pdfData = await fetchOrderPdf(orderId);
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `commande-${orderId}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (err) {
-      console.error('Erreur lors du téléchargement du PDF :', err.message);
-      alert('Une erreur est survenue lors du téléchargement du bon de commande.');
-    }
-  },
+          const url = window.URL.createObjectURL(new Blob([pdfData]));
+          const link = document.createElement('a');
+          link.href = url;
+
+          link.setAttribute('download', `commande-${orderId}.pdf`);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } catch (err) {
+          alert('Une erreur est survenue lors du téléchargement du bon de commande.');
+        }
+      },
     },
   };
-  </script>
+</script>
   

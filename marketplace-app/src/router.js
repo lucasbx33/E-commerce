@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from './views/Home.vue';
-import RegisterComponent from './views/Register.vue';
-import Login from './views/Login.vue';
+import RegisterComponent from './components/auth/RegisterComponent.vue';
+import Login from './components/auth/LoginComponent.vue';
 import Profile from './views/Profil.vue';
 import { useAuthStore } from './stores/auth';
 import CreateArticle from './views/CreateArticle.vue';
@@ -28,7 +28,7 @@ const routes = [
   {
     path: '/createArticle',
     component: CreateArticle,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, roles: ['ROLE_ADMIN'] }
   },
   {
     path: '/cart',
@@ -66,19 +66,22 @@ router.beforeEach(async (to, from, next) => {
         if (!authStore.isAuthenticated) {
           throw new Error('User not authenticated');
         }
-        next();
       } catch (error) {
-        next('/login');
+        return next('/login');
       }
-    } else {
-      next();
     }
+
+    if (to.meta.roles) {
+      const userHasRole = to.meta.roles.some((role) => authStore.hasRole(role));
+      if (!userHasRole) {
+        return next('/');
+      }
+    }
+
+    next();
   } else {
     next();
   }
 });
-
-
-
 
 export default router;

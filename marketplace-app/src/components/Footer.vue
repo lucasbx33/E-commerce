@@ -4,10 +4,10 @@
       <!-- Left Side: Logo and Info -->
       <div class="text-center md:text-left">
         <a href="/" class="text-gray-700 text-3xl font-bold hover:text-gray-600 transition">
-          ECLORE
+          Ma petite cave
         </a>
         <p class="text-gray-400 mt-2">
-          &copy; 2024 MonEcommerce. Tous droits réservés.
+          &copy; 2024 Ma petite cave. Tous droits réservés.
         </p>
       </div>
 

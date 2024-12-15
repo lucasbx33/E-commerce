@@ -1,7 +1,6 @@
 <template>
   <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full overflow-hidden">
-
       <div class="p-6 space-y-6">
         <div>
           <h3 class="text-lg font-semibold text-gray-700">Informations personnelles</h3>
@@ -45,9 +44,9 @@
 </template>
 
 <script>
-import axios from "axios";
 import { notification } from "ant-design-vue";
 import InputField from "../components/input/InputProfil.vue";
+import { fetchUserProfile, updateUserProfile } from "@/services/user";
 
 export default {
   name: "ProfilView",
@@ -65,24 +64,15 @@ export default {
   },
   async mounted() {
     try {
-      const response = await axios.post(
-        "http://localhost:3000/auth/me",
-        {},
-        { withCredentials: true }
-      );
-
-      const { firstName, lastName, email, phone } = response.data.user;
+      const userData = await fetchUserProfile();
       this.user = {
-        firstName,
-        lastName,
-        email,
-        phone: phone || "",
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        phone: userData.phone || "",
       };
     } catch (error) {
-      console.error(
-        "Erreur lors de la récupération des informations utilisateur :",
-        error
-      );
+      console.error('Erreur lors du chargement des données utilisateur.', error);
     }
   },
   methods: {
@@ -94,15 +84,11 @@ export default {
     },
     async saveChanges() {
       try {
-        await axios.put(
-          "http://localhost:3000/auth/update",
-          {
-            firstName: this.user.firstName,
-            lastName: this.user.lastName,
-            phone: this.user.phone,
-          },
-          { withCredentials: true }
-        );
+        await updateUserProfile({
+          firstName: this.user.firstName,
+          lastName: this.user.lastName,
+          phone: this.user.phone,
+        });
         notification.success({
           message: "Profil mis à jour",
           description: "Vos informations ont été mises à jour avec succès.",
@@ -112,7 +98,6 @@ export default {
           message: "Erreur",
           description: "Une erreur s'est produite lors de la mise à jour du profil.",
         });
-        console.error("Erreur lors de la sauvegarde des modifications :", error);
       }
     },
   },
