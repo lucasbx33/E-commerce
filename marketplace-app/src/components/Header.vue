@@ -44,7 +44,10 @@
           </li>
           <!-- Panier visible uniquement sur mobile -->
           <li v-if="!isAdmin" class="lg:hidden">
-            <button @click="$router.push('/cart')" class="flex items-center px-6 py-4 text-gray-700 hover:text-blue-600 transition duration-300 font-medium">
+            <button
+              @click="$router.push('/cart')"
+              class="flex items-center px-6 py-4 text-gray-700 hover:text-blue-600 transition duration-300 font-medium"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -70,23 +73,30 @@
               </span>
             </button>
           </li>
-          <!-- Profil visible uniquement sur mobile -->
-          <li v-if="isLoggedIn" class="lg:hidden">
-            <button @click="toggleDropdown" class="flex items-center px-6 py-4 text-gray-700 hover:text-blue-600 transition duration-300 font-medium">
-              <img
-                src="https://www.w3schools.com/howto/img_avatar.png"
-                alt="Profil"
-                class="w-8 h-8 rounded-full border-2 border-blue-600 mr-2"
-              />
-              Profil
+          <!-- Connexion visible uniquement sur mobile -->
+          <li v-if="!isLoggedIn" class="lg:hidden">
+            <button
+              @click="$router.push('/login')"
+              class="block px-6 py-4 text-gray-700 hover:text-blue-600 transition duration-300 font-medium"
+            >
+              Connexion
             </button>
           </li>
         </ul>
       </div>
 
-      <!-- Profil et Panier visibles uniquement sur desktop -->
+      <!-- Profil, Panier et Connexion visibles uniquement sur desktop -->
       <div class="hidden lg:flex items-center space-x-6">
-        <!-- Panier -->
+        <!-- Connexion sur desktop -->
+        <button
+          v-if="!isLoggedIn"
+          @click="$router.push('/login')"
+          class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-500 shadow"
+        >
+          Connexion
+        </button>
+
+        <!-- Panier sur desktop -->
         <div class="relative" v-if="!isAdmin">
           <button @click="$router.push('/cart')" class="relative flex items-center">
             <svg
@@ -113,39 +123,10 @@
             </span>
           </button>
         </div>
-
-        <!-- Profil -->
-        <div v-if="isLoggedIn" class="relative">
-          <button @click="toggleDropdown" class="flex items-center space-x-2 focus:outline-none">
-            <img
-              src="https://www.w3schools.com/howto/img_avatar.png"
-              alt="Profil"
-              class="w-10 h-10 rounded-full border-2 border-blue-600"
-            />
-            <span class="text-gray-700">{{ userName }}</span>
-          </button>
-
-          <!-- Dropdown Menu -->
-          <div v-if="dropdownOpen" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-20">
-            <router-link to="/profil" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
-              Mon Profil
-            </router-link>
-            <router-link to="/orders" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" v-if="!isAdmin">
-              Mes commandes
-            </router-link>
-            <button
-              @click="logout"
-              class="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
-            >
-              Déconnexion
-            </button>
-          </div>
-        </div>
       </div>
     </nav>
   </header>
 </template>
-
 
 <script>
 import { ref } from 'vue';
