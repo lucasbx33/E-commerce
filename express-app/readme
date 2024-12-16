@@ -1,8 +1,14 @@
-Générer le fichier de base de données
+### Installer les dépendances nécessaires
+npm install
+
+### .env
+Renommer le .env.example en .env
+
+### Générer le fichier de base de données
 npx prisma migrate reset
 
-Importer des fausses données
+### Importer des fausses données
 node data.js
 
-Lancer l'api
+### Lancer l'api
 npm start
